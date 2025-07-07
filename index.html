@@ -126,24 +126,18 @@
                 </div>
             </div>
             <div class="text-center">
-                <button id="show-plan-btn" class="bg-brand-yellow hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Ver Plan de Acción</button>
+                <button id="show-plan-btn" class="bg-brand-yellow hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Ver Plan de Acción Completo</button>
             </div>
         </div>
         
         <!-- 5. Plan de Acción Personalizado -->
         <div id="action-plan-screen" class="screen p-8 md:p-12 hidden">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Plan de Acción Personalizado</h2>
-            <div class="bg-gray-50 p-6 rounded-lg mb-6">
-                <h3 class="text-xl font-semibold text-gray-700 mb-2">Potencia tus Fortalezas</h3>
-                <p class="text-gray-600 mb-4">Potencia estas habilidades como tus ventajas competitivas actuales. Úsalas para liderar tus proyectos y enseñar a otros.</p>
-                <ul id="action-strengths" class="list-disc list-inside text-gray-700 space-y-2"></ul>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Tu Plan de Acción Completo</h2>
+            <p class="text-center text-gray-600 mb-8">Aquí tienes un resumen de cada habilidad, tu puntuación y acciones sugeridas para seguir creciendo.</p>
+            <div id="full-action-plan" class="space-y-4">
+                <!-- El plan de acción completo se insertará aquí dinámicamente -->
             </div>
-             <div class="bg-gray-50 p-6 rounded-lg mb-8">
-                <h3 class="text-xl font-semibold text-gray-700 mb-2">Desarrolla tus Oportunidades</h3>
-                <p class="text-gray-600 mb-4">Te recomendamos trabajar activamente estas habilidades con ejercicios, mentoría o capacitación específica. Aquí algunas ideas:</p>
-                <ul id="action-weaknesses" class="list-disc list-inside text-gray-700 space-y-2"></ul>
-            </div>
-            <div class="text-center">
+            <div class="text-center mt-8">
                  <button id="show-final-btn" class="bg-brand-blue hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Finalizar</button>
             </div>
         </div>
@@ -175,11 +169,11 @@
 
         const actionPlanSuggestions = {
             "Resiliencia": "Lee 'El obstáculo es el camino' de Ryan Holiday. Practica la meditación mindfulness para aceptar situaciones sin juicio.",
-            "Visión Estratégica": "Usa la herramienta 'Business Model Canvas'. [Aprende más](https://www.strategyzer.com/the-business-model-canvas). Define tus objetivos SMART. [Ver guía](https://asana.com/es/resources/smart-goals).",
+            "Visión Estratégica": "Usa la herramienta 'Business Model Canvas'. [Aprende más](https://asana.com/es/resources/business-model-canvas). Define tus objetivos SMART. [Ver guía](https://asana.com/es/resources/smart-goals).",
             "Adaptabilidad": "Realiza un 'premortem' para tus proyectos: imagina que han fallado y analiza las posibles causas. [Leer sobre la técnica](https://hbr.org/2007/09/performing-a-project-premortem).",
             "Perseverancia": "Lee 'Grit' de Angela Duckworth. Divide grandes metas en tareas pequeñas y celebra cada logro.",
             "Liderazgo": "Lee 'Cómo ganar amigos e influir sobre las personas' de Dale Carnegie. Pide feedback a tu equipo sobre tu estilo de liderazgo.",
-            "Inteligencia Emocional": "Practica la escucha activa. [Técnicas aquí](https://www.forbes.com/sites/forbescoachescouncil/2017/11/15/the-art-of-active-listening-seven-ways-it-can-help-your-career/). Lleva un diario de emociones para identificar patrones.",
+            "Inteligencia Emocional": "Practica la escucha activa. [Técnicas aquí](https://asana.com/es/resources/active-listening). Lleva un diario de emociones para identificar patrones.",
             "Capacidad de Aprender Rápido": "Aplica la técnica de Feynman para entender profundamente un tema. [Ver explicación](https://fs.blog/feynman-technique/). Dedica 30 minutos al día a aprender algo nuevo.",
             "Gestión del Tiempo y la Energía": "Usa la Matriz de Eisenhower. [Ver cómo funciona](https://todoist.com/es/productivity-methods/eisenhower-matrix). Implementa la técnica Pomodoro. [Guía aquí](https://todoist.com/es/productivity-methods/pomodoro-technique)."
         };
@@ -338,11 +332,11 @@
             document.getElementById('diagnosis-text').textContent = diagnosis;
 
             const sortedSkills = [...skills].sort((a, b) => b.score - a.score);
-            const strengths = sortedSkills.slice(0, 2);
-            const weaknesses = sortedSkills.slice(-2).reverse();
+            const strengths = sortedSkills.filter(s => s.score >= 4);
+            const weaknesses = sortedSkills.filter(s => s.score <= 2);
 
-            document.getElementById('strengths-list').innerHTML = strengths.map(s => `<li>${s.title} (Puntuación: ${s.score})</li>`).join('');
-            document.getElementById('weaknesses-list').innerHTML = weaknesses.map(s => `<li>${s.title} (Puntuación: ${s.score})</li>`).join('');
+            document.getElementById('strengths-list').innerHTML = strengths.map(s => `<li>${s.title} (Puntuación: ${s.score})</li>`).join('') || '<li>Aún no tienes fortalezas destacadas. ¡Sigue trabajando!</li>';
+            document.getElementById('weaknesses-list').innerHTML = weaknesses.map(s => `<li>${s.title} (Puntuación: ${s.score})</li>`).join('') || '<li>¡No se identificaron debilidades claras!</li>';
 
             renderResultsChart();
             showScreen(resultsScreen);
@@ -374,12 +368,36 @@
         }
 
         function renderActionPlan() {
-            const sortedSkills = [...skills].sort((a, b) => b.score - a.score);
-            const strengths = sortedSkills.slice(0, 2);
-            const weaknesses = sortedSkills.slice(-2).reverse();
-            
-            document.getElementById('action-strengths').innerHTML = strengths.map(s => `<li><strong>${s.title}:</strong> Sigue aplicando esta habilidad para diferenciarte.</li>`).join('');
-            document.getElementById('action-weaknesses').innerHTML = weaknesses.map(s => `<li><strong>${s.title}:</strong> ${parseAndCreateLinks(actionPlanSuggestions[s.title])}</li>`).join('');
+            const planContainer = document.getElementById('full-action-plan');
+            planContainer.innerHTML = ''; // Limpiar contenido previo
+
+            skills.forEach(skill => {
+                let borderColor, scoreBgColor;
+                if (skill.score >= 4) { // Fortaleza
+                    borderColor = '#28a745'; // Verde
+                    scoreBgColor = '#28a745';
+                } else if (skill.score === 3) { // Neutral / En desarrollo
+                    borderColor = '#facc15'; // Amarillo
+                    scoreBgColor = '#facc15';
+                } else { // Debilidad
+                    borderColor = '#dc3545'; // Rojo
+                    scoreBgColor = '#dc3545';
+                }
+
+                const suggestion = actionPlanSuggestions[skill.title] || "Sigue practicando y buscando nuevas formas de mejorar esta habilidad.";
+                const suggestionHTML = parseAndCreateLinks(suggestion);
+
+                const skillCardHTML = `
+                    <div class="p-4 rounded-lg bg-gray-50" style="border-left: 5px solid ${borderColor};">
+                        <div class="flex justify-between items-start md:items-center flex-col md:flex-row">
+                            <h4 class="text-lg font-bold text-gray-800 mb-2 md:mb-0">${skill.title}</h4>
+                            <span class="font-bold text-white px-3 py-1 rounded-full text-sm" style="background-color: ${scoreBgColor};">Puntuación: ${skill.score}</span>
+                        </div>
+                        <p class="text-gray-700 mt-2">${suggestionHTML}</p>
+                    </div>
+                `;
+                planContainer.innerHTML += skillCardHTML;
+            });
         }
         
         // --- LÓGICA DE COMPARTIR ---
