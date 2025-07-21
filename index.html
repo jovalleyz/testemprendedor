@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Business Lab – Autoevaluación de Perfil Emprendedor</title>
+    
+    <!-- Metadatos para SEO y redes sociales -->
+    <meta name="description" content="Autoevalúa tus habilidades como emprendedor y recibe un plan de acción personalizado para potenciar tu camino hacia un negocio rentable.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+
+    <!-- Open Graph (para Facebook, WhatsApp, LinkedIn, etc.) -->
+    <meta property="og:title" content="The Business Lab – Autoevaluación de Perfil Emprendedor">
+    <meta property="og:description" content="Descubre tus fortalezas y debilidades como emprendedor con esta herramienta interactiva y recibe un plan de acción personalizado.">
+    <meta property="og:image" content="https://placehold.co/1200x630/1e40af/ffffff?text=🚀&font=inter">
+    <meta property="og:url" content="https://tu-app.com/autoevaluacion"> <!-- Reemplazar con la URL real -->
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Business Lab – Autoevaluación de Perfil Emprendedor">
+    <meta name="twitter:description" content="Descubre tus fortalezas y debilidades como emprendedor con esta herramienta interactiva y recibe un plan de acción personalizado.">
+    <meta name="twitter:image" content="https://placehold.co/1200x630/1e40af/ffffff?text=🚀&font=inter">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right top, #1e3a8a, #1e40af, #1d4ed8, #2563eb, #3b82f6);
+        }
+        /* Estilos para los colores de la marca */
+        .bg-brand-blue { background-color: #3b82f6; } /* Azul más brillante */
+        .bg-brand-yellow { background-color: #facc15; } /* Amarillo más vibrante */
+        .text-brand-blue { color: #3b82f6; }
+        .text-brand-yellow { color: #facc15; }
+        .border-brand-blue { border-color: #3b82f6; }
+        .border-brand-yellow { border-color: #facc15; }
+
+        /* Animación para la aparición de las pantallas */
+        .screen {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Estilo para el selector de puntuación */
+        .score-selector input:checked + label {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: scale(1.1);
+        }
+        .score-selector label {
+            transition: all 0.2s ease-in-out;
+        }
+        .error-message {
+            display: none;
+            color: #ef4444; /* Rojo */
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="app-container" class="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden">
+
+        <!-- Contenido principal -->
+        <main>
+            <!-- Barra de Progreso -->
+            <div id="progress-bar-container" class="w-full bg-gray-200 h-2.5 hidden">
+                <div id="progress-bar" class="bg-brand-blue h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            
+            <!-- 1. Pantalla de Bienvenida -->
+            <div id="welcome-screen" class="screen p-8 md:p-12 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    <span class="text-5xl md:text-6xl">🚀</span> The Business Lab
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 mb-8">De la idea a un negocio rentable</p>
+                <p class="text-gray-700 mb-6">Para comenzar, completa tus datos:</p>
+                <div class="max-w-sm mx-auto space-y-4">
+                    <div>
+                        <input type="text" id="user-name" placeholder="Nombre Completo" class="w-full p-3 border-2 border-gray-300 rounded-lg text-center text-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent transition">
+                        <p id="name-error" class="error-message">Por favor, ingresa tu nombre.</p>
+                    </div>
+                    <div>
+                        <input type="email" id="user-email" placeholder="Correo Electrónico" class="w-full p-3 border-2 border-gray-300 rounded-lg text-center text-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent transition">
+                        <p id="email-error" class="error-message">Por favor, ingresa un correo válido.</p>
+                    </div>
+                    <div>
+                        <input type="tel" id="user-phone" placeholder="Número de Teléfono" class="w-full p-3 border-2 border-gray-300 rounded-lg text-center text-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent transition">
+                        <p id="phone-error" class="error-message">Por favor, ingresa tu teléfono.</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <button id="start-btn" class="bg-brand-blue hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Comenzar Evaluación</button>
+                </div>
+            </div>
+
+            <!-- 2. Pantalla de Instrucciones -->
+            <div id="instructions-screen" class="screen p-8 md:p-12 text-center hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Instrucciones</h2>
+                <p class="text-gray-700 mb-8">Responde cada pregunta con sinceridad. Evalúa tus habilidades del 1 al 5, donde:</p>
+                <div class="flex justify-center space-x-4 mb-8 text-center">
+                    <div><span class="font-bold text-brand-blue">1</span> = Muy débil</div>
+                    <div><span class="font-bold text-brand-blue">5</span> = Muy fuerte</div>
+                </div>
+                <p class="text-gray-700 mb-10">Al finalizar, recibirás un diagnóstico automático y un plan de acción personalizado.</p>
+                <button id="start-eval-btn" class="bg-brand-blue hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Iniciar Evaluación</button>
+            </div>
+
+            <!-- 3. Pantallas de Evaluación (Contenedor) -->
+            <div id="evaluation-container" class="screen p-8 md:p-12 hidden">
+                <!-- El contenido de la evaluación se insertará aquí dinámicamente -->
+            </div>
+
+            <!-- 4. Pantalla de Resultados -->
+            <div id="results-screen" class="screen p-8 md:p-12 hidden">
+                <h2 id="results-title" class="text-3xl font-bold text-gray-800 mb-2 text-center">Tus Resultados</h2>
+                <p id="diagnosis-text" class="text-lg text-gray-600 mb-8 text-center"></p>
+                
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Resumen de Habilidades</h3>
+                    <div class="relative h-80 md:h-96">
+                        <canvas id="results-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-green-100 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-green-800 mb-3">✅ Fortalezas</h3>
+                        <ul id="strengths-list" class="list-disc list-inside text-green-700"></ul>
+                    </div>
+                    <div class="bg-yellow-100 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-yellow-800 mb-3">⚠️ Áreas de Mejora</h3>
+                        <ul id="weaknesses-list" class="list-disc list-inside text-yellow-700"></ul>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button id="show-plan-btn" class="bg-brand-yellow hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Ver Plan de Acción Completo</button>
+                </div>
+            </div>
+            
+            <!-- 5. Plan de Acción Personalizado -->
+            <div id="action-plan-screen" class="screen p-8 md:p-12 hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Tu Plan de Acción Completo</h2>
+                <p class="text-center text-gray-600 mb-8">Aquí tienes un resumen de cada habilidad, tu puntuación y acciones sugeridas para seguir creciendo.</p>
+                <div id="full-action-plan" class="space-y-4">
+                    <!-- El plan de acción completo se insertará aquí dinámicamente -->
+                </div>
+                <div class="text-center mt-8">
+                     <button id="show-final-btn" class="bg-brand-blue hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">Finalizar</button>
+                </div>
+            </div>
+
+            <!-- 6. Pantalla Final -->
+            <div id="final-screen" class="screen p-8 md:p-12 text-center hidden">
+                <h2 id="final-title" class="text-3xl font-bold text-gray-800 mb-6">¡Evaluación Completada!</h2>
+                <p class="text-gray-700 mb-8">¿Qué te gustaría hacer ahora?</p>
+                <div class="flex flex-col md:flex-row justify-center gap-4">
+                    <button id="share-whatsapp-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Compartir en WhatsApp</button>
+                    <button id="restart-btn" class="bg-brand-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Volver a comenzar</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center p-4 bg-gray-100 border-t">
+            <p class="text-sm text-gray-600">The Business Lab. El programa de negocios para futuros emprendedores.</p>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURACIÓN DE LA EVALUACIÓN ---
+        const skills = [
+            { title: "Resiliencia", description: "Capacidad para sobreponerse a dificultades y recuperarse de fracasos.", question: "¿Qué tan bien manejas los fracasos o imprevistos cuando las cosas no salen como esperas?", score: 0 },
+            { title: "Visión Estratégica", description: "Habilidad para planificar en el mediano y largo plazo, visualizando metas y los pasos necesarios.", question: "¿Con qué frecuencia defines objetivos de largo plazo y estructuras un plan para alcanzarlos?", score: 0 },
+            { title: "Adaptabilidad", description: "Capacidad para ajustarte a cambios en el entorno, nuevas condiciones o imprevistos con flexibilidad.", question: "¿Qué tan cómodo te sientes cambiando de enfoque o ajustando tu camino ante situaciones nuevas o inesperadas?", score: 0 },
+            { title: "Perseverancia", description: "Determinación constante para avanzar, incluso ante dificultades y rechazos.", question: "¿Qué tan seguido mantienes tu esfuerzo ante obstáculos o experiencias negativas?", score: 0 },
+            { title: "Liderazgo", description: "Capacidad para influir, inspirar y guiar equipos hacia objetivos comunes.", question: "¿Qué tan bien motivas a otros para trabajar juntos en pos de una meta?", score: 0 },
+            { title: "Inteligencia Emocional", description: "Habilidad para comprender y gestionar tus emociones y las de los demás de manera equilibrada.", question: "¿Cómo sueles responder ante críticas o tensiones emocionales en tu entorno?", score: 0 },
+            { title: "Capacidad de Aprender Rápido", description: "Habilidad para adquirir y aplicar nuevos conocimientos con rapidez a situaciones reales.", question: "¿Con qué frecuencia incorporas nuevas habilidades o conocimientos para mejorar tu emprendimiento?", score: 0 },
+            { title: "Gestión del Tiempo y la Energía", description: "Disciplina para organizar tareas, priorizar lo importante y administrar tu energía eficientemente.", question: "¿Qué tan eficaz eres organizando tu día y enfocándote en tareas con mayor impacto?", score: 0 }
+        ];
+
+        const actionPlanSuggestions = {
+            "Resiliencia": "Lee 'El obstáculo es el camino' de Ryan Holiday. Practica la meditación mindfulness para aceptar situaciones sin juicio.",
+            "Visión Estratégica": "Usa la herramienta 'Business Model Canvas'. [Aprende más](https://asana.com/es/resources/business-model-canvas). Define tus objetivos SMART. [Ver guía](https://asana.com/es/resources/smart-goals).",
+            "Adaptabilidad": "Realiza un 'premortem' para tus proyectos: imagina que han fallado y analiza las posibles causas. [Leer sobre la técnica](https://hbr.org/2007/09/performing-a-project-premortem).",
+            "Perseverancia": "Lee 'Grit' de Angela Duckworth. Divide grandes metas en tareas pequeñas y celebra cada logro.",
+            "Liderazgo": "Lee 'Cómo ganar amigos e influir sobre las personas' de Dale Carnegie. Pide feedback a tu equipo sobre tu estilo de liderazgo.",
+            "Inteligencia Emocional": "Practica la escucha activa. [Técnicas aquí](https://asana.com/es/resources/active-listening). Lleva un diario de emociones para identificar patrones.",
+            "Capacidad de Aprender Rápido": "Aplica la técnica de Feynman para entender profundamente un tema. [Ver explicación](https://fs.blog/feynman-technique/). Dedica 30 minutos al día a aprender algo nuevo.",
+            "Gestión del Tiempo y la Energía": "Usa la Matriz de Eisenhower. [Ver cómo funciona](https://todoist.com/es/productivity-methods/eisenhower-matrix). Implementa la técnica Pomodoro. [Guía aquí](https://todoist.com/es/productivity-methods/pomodoro-technique)."
+        };
+
+        let currentSkillIndex = 0;
+        let chartInstance = null;
+        let userData = { name: '', email: '', phone: '' };
+
+        // --- ELEMENTOS DEL DOM ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const instructionsScreen = document.getElementById('instructions-screen');
+        const evaluationContainer = document.getElementById('evaluation-container');
+        const resultsScreen = document.getElementById('results-screen');
+        const actionPlanScreen = document.getElementById('action-plan-screen');
+        const finalScreen = document.getElementById('final-screen');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const nameInput = document.getElementById('user-name');
+        const emailInput = document.getElementById('user-email');
+        const phoneInput = document.getElementById('user-phone');
+
+        const nameError = document.getElementById('name-error');
+        const emailError = document.getElementById('email-error');
+        const phoneError = document.getElementById('phone-error');
+
+        // --- BOTONES ---
+        const startBtn = document.getElementById('start-btn');
+        const startEvalBtn = document.getElementById('start-eval-btn');
+        const showPlanBtn = document.getElementById('show-plan-btn');
+        const showFinalBtn = document.getElementById('show-final-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const shareWhatsappBtn = document.getElementById('share-whatsapp-btn');
+
+        // --- LÓGICA DE NAVEGACIÓN Y VALIDACIÓN ---
+        function showScreen(screen) {
+            [welcomeScreen, instructionsScreen, evaluationContainer, resultsScreen, actionPlanScreen, finalScreen].forEach(s => s.classList.add('hidden'));
+            screen.classList.remove('hidden');
+        }
+
+        function validateEmail(email) {
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        startBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.trim();
+            let isValid = true;
+
+            if (!name) {
+                nameError.style.display = 'block';
+                isValid = false;
+            } else {
+                nameError.style.display = 'none';
+            }
+
+            if (!validateEmail(email)) {
+                emailError.style.display = 'block';
+                isValid = false;
+            } else {
+                emailError.style.display = 'none';
+            }
+
+            if (!phone) {
+                phoneError.style.display = 'block';
+                isValid = false;
+            } else {
+                phoneError.style.display = 'none';
+            }
+
+            if (isValid) {
+                userData = { name, email, phone };
+                showScreen(instructionsScreen);
+            }
+        });
+
+        startEvalBtn.addEventListener('click', () => {
+            progressBarContainer.classList.remove('hidden');
+            showScreen(evaluationContainer);
+            renderEvaluationScreen();
+        });
+        showPlanBtn.addEventListener('click', () => {
+            renderActionPlan();
+            showScreen(actionPlanScreen);
+        });
+        showFinalBtn.addEventListener('click', () => {
+            document.getElementById('final-title').textContent = `¡Evaluación Completada, ${userData.name}!`;
+            showScreen(finalScreen);
+        });
+        restartBtn.addEventListener('click', () => {
+            currentSkillIndex = 0;
+            userData = { name: '', email: '', phone: '' };
+            nameInput.value = '';
+            emailInput.value = '';
+            phoneInput.value = '';
+            skills.forEach(s => s.score = 0);
+            if (chartInstance) chartInstance.destroy();
+            progressBar.style.width = '0%';
+            progressBarContainer.classList.add('hidden');
+            showScreen(welcomeScreen);
+        });
+
+        // --- LÓGICA DE EVALUACIÓN ---
+        function renderEvaluationScreen() {
+            if (currentSkillIndex >= skills.length) {
+                calculateResults();
+                return;
+            }
+
+            const skill = skills[currentSkillIndex];
+            const isFirstQuestion = currentSkillIndex === 0;
+            
+            evaluationContainer.innerHTML = `
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">${skill.title}</h2>
+                    <p class="text-gray-600 mt-2">${skill.description}</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner mb-8">
+                    <p class="text-lg text-center text-gray-700 font-semibold">${skill.question}</p>
+                </div>
+                <div class="flex justify-center items-center space-x-2 md:space-x-4 score-selector">
+                    ${[1, 2, 3, 4, 5].map(value => `
+                        <div class="flex flex-col items-center">
+                            <input type="radio" id="score-${value}" name="score" value="${value}" class="sr-only" ${skills[currentSkillIndex].score === value ? 'checked' : ''}>
+                            <label for="score-${value}" class="cursor-pointer w-12 h-12 md:w-14 md:h-14 flex items-center justify-center border-2 border-gray-300 rounded-full text-xl font-bold text-gray-600 hover:bg-gray-200">${value}</label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="flex justify-center mt-10 gap-4">
+                    <button id="back-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300 ${isFirstQuestion ? 'opacity-50 cursor-not-allowed' : ''}" ${isFirstQuestion ? 'disabled' : ''}>Volver</button>
+                    <button id="next-btn" class="bg-brand-blue text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 opacity-50 cursor-not-allowed" disabled>Siguiente</button>
+                </div>
+            `;
+            
+            updateProgressBar();
+            addEvaluationListeners();
+        }
+
+        function addEvaluationListeners() {
+            const scoreInputs = document.querySelectorAll('input[name="score"]');
+            const nextBtn = document.getElementById('next-btn');
+            const backBtn = document.getElementById('back-btn');
+
+            if(document.querySelector('input[name="score"]:checked')){
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            scoreInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    nextBtn.disabled = false;
+                    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+            });
+
+            nextBtn.addEventListener('click', () => {
+                skills[currentSkillIndex].score = parseInt(document.querySelector('input[name="score"]:checked').value, 10);
+                currentSkillIndex++;
+                renderEvaluationScreen();
+            });
+            
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    if (currentSkillIndex > 0) {
+                        currentSkillIndex--;
+                        renderEvaluationScreen();
+                    }
+                });
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = (currentSkillIndex / skills.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // --- LÓGICA DE RESULTADOS Y CSV ---
+        function generateAndDownloadCSV() {
+            const headers = ['Nombre', 'Correo Electronico', 'Telefono', ...skills.map(s => s.title)];
+            const userScores = skills.map(s => s.score);
+            const userDataRow = [userData.name, userData.email, userData.phone, ...userScores];
+
+            // Escapar comas en los datos del usuario por si acaso
+            const cleanRow = userDataRow.map(item => `"${String(item).replace(/"/g, '""')}"`);
+            
+            let csvContent = "data:text/csv;charset=utf-8," 
+                + headers.join(',') + "\n" 
+                + cleanRow.join(',');
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const fileName = `${userData.name.replace(/ /g, '_')}_evaluacion.csv`;
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function calculateResults() {
+            progressBarContainer.classList.add('hidden');
+            const totalScore = skills.reduce((sum, skill) => sum + skill.score, 0);
+            
+            let diagnosis = "";
+            if (totalScore >= 32) diagnosis = "Perfil muy fuerte: Puedes avanzar rápidamente. Mantén la mejora continua.";
+            else if (totalScore >= 24) diagnosis = "Perfil sólido con áreas de mejora: Refuerza las habilidades con puntuación baja para potenciar tu ejecución.";
+            else if (totalScore >= 16) diagnosis = "Perfil en desarrollo: Es importante fortalecer tus áreas débiles antes de acelerar la ejecución.";
+            else diagnosis = "Perfil en formación inicial: Necesitas trabajar activamente en tus habilidades clave antes de lanzar tu proyecto.";
+            
+            document.getElementById('results-title').textContent = `Tus Resultados, ${userData.name}!`;
+            document.getElementById('diagnosis-text').textContent = diagnosis;
+
+            const sortedSkills = [...skills].sort((a, b) => b.score - a.score);
+            const strengths = sortedSkills.filter(s => s.score >= 4);
+            const weaknesses = sortedSkills.filter(s => s.score <= 2);
+
+            document.getElementById('strengths-list').innerHTML = strengths.map(s => `<li>${s.title} (Puntuación: ${s.score})</li>`).join('') || '<li>Aún no tienes fortalezas destacadas. ¡Sigue trabajando!</li>';
+            document.getElementById('weaknesses-list').innerHTML = weaknesses.map(s => `<li>${s.title} (Puntuación: ${s.score})</li>`).join('') || '<li>¡No se identificaron debilidades claras!</li>';
+
+            renderResultsChart();
+            generateAndDownloadCSV(); // Generar y descargar el CSV automáticamente
+            showScreen(resultsScreen);
+        }
+
+        function renderResultsChart() {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: skills.map(s => s.title),
+                    datasets: [{
+                        label: 'Puntuación',
+                        data: skills.map(s => s.score),
+                        backgroundColor: ['#007BFF', '#facc15', '#28A745', '#DC3545', '#17A2B8', '#6F42C1', '#F012BE', '#FD7E14'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+            });
+        }
+        
+        // --- LÓGICA DEL PLAN DE ACCIÓN ---
+        function parseAndCreateLinks(text) {
+            const regex = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+            return text.replace(regex, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-brand-blue hover:underline font-semibold">$1</a>');
+        }
+
+        function renderActionPlan() {
+            const planContainer = document.getElementById('full-action-plan');
+            planContainer.innerHTML = ''; // Limpiar contenido previo
+
+            skills.forEach(skill => {
+                let borderColor, scoreBgColor;
+                if (skill.score >= 4) { // Fortaleza
+                    borderColor = '#28a745'; // Verde
+                    scoreBgColor = '#28a745';
+                } else if (skill.score === 3) { // Neutral / En desarrollo
+                    borderColor = '#facc15'; // Amarillo
+                    scoreBgColor = '#facc15';
+                } else { // Debilidad
+                    borderColor = '#dc3545'; // Rojo
+                    scoreBgColor = '#dc3545';
+                }
+
+                const suggestion = actionPlanSuggestions[skill.title] || "Sigue practicando y buscando nuevas formas de mejorar esta habilidad.";
+                const suggestionHTML = parseAndCreateLinks(suggestion);
+
+                const skillCardHTML = `
+                    <div class="p-4 rounded-lg bg-gray-50" style="border-left: 5px solid ${borderColor};">
+                        <div class="flex justify-between items-start md:items-center flex-col md:flex-row">
+                            <h4 class="text-lg font-bold text-gray-800 mb-2 md:mb-0">${skill.title}</h4>
+                            <span class="font-bold text-white px-3 py-1 rounded-full text-sm" style="background-color: ${scoreBgColor};">Puntuación: ${skill.score}</span>
+                        </div>
+                        <p class="text-gray-700 mt-2">${suggestionHTML}</p>
+                    </div>
+                `;
+                planContainer.innerHTML += skillCardHTML;
+            });
+        }
+        
+        // --- LÓGICA DE COMPARTIR ---
+        shareWhatsappBtn.addEventListener('click', () => {
+            const totalScore = skills.reduce((sum, skill) => sum + skill.score, 0);
+            const diagnosis = document.getElementById('diagnosis-text').textContent;
+            const message = `🚀 ¡${userData.name} ha completado la autoevaluación de perfil emprendedor en The Business Lab! �\n\n*Mi diagnóstico:* ${diagnosis}\n*Puntuación total:* ${totalScore}/40 💪`;
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        });
+    });
+    </script>
+</body>
+</html>
